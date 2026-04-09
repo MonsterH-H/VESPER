@@ -47,6 +47,7 @@ Le flux de données est le suivant :
 2. **Texte** → `HFLLMManager` (LLM) → **Réponse**
 3. **Réponse** → `ElevenLabsManager` (TTS) → **Voix**
 
+![alt text](image.png)
 
 ---
 
