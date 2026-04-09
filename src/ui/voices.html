@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VESPER — Synthèse Vocale</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="mesh-bg">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i data-lucide="zap"></i>
+                VESPER<span>.AI</span>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item">
+                        <a href="/">
+                            <i data-lucide="mic-2"></i>
+                            <span>Interaction</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/models.html">
+                            <i data-lucide="cpu"></i>
+                            <span>Modèles IA</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="/voices.html">
+                            <i data-lucide="volume-2"></i>
+                            <span>Synthèse Vocale</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/settings.html">
+                            <i data-lucide="settings"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Voices Section -->
+        <section class="core-stage">
+            <div class="content-header">
+                <h2>🔊 Synthèse Vocale Premium</h2>
+                <p>Choisissez parmi nos voix IA ultra-naturelles alimentées par ElevenLabs</p>
+            </div>
+
+            <!-- Voice Grid -->
+            <div class="voices-grid">
+                <!-- Voice: Rachel -->
+                <div class="voice-card active" data-voice="Rachel">
+                    <div class="voice-visualizer">
+                        <div class="voice-bars">
+                            <div></div><div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    <h3>Rachel</h3>
+                    <p class="voice-desc">Voix chaleureuse et professionnelle</p>
+                    <div class="voice-tags">
+                        <span>Féminin</span>
+                        <span>Français 🇫🇷</span>
+                        <span>Naturelle</span>
+                    </div>
+                    <button class="btn btn-play" onclick="playVoiceSample('Rachel')">
+                        <i data-lucide="play"></i> Écouter
+                    </button>
+                </div>
+
+                <!-- Voice: Antoine -->
+                <div class="voice-card" data-voice="Antoine">
+                    <div class="voice-visualizer">
+                        <div class="voice-bars">
+                            <div></div><div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    <h3>Antoine</h3>
+                    <p class="voice-desc">Voix masculine profonde et claire</p>
+                    <div class="voice-tags">
+                        <span>Masculin</span>
+                        <span>Français 🇫🇷</span>
+                        <span>Dynamique</span>
+                    </div>
+                    <button class="btn btn-play" onclick="playVoiceSample('Antoine')">
+                        <i data-lucide="play"></i> Écouter
+                    </button>
+                </div>
+
+                <!-- Voice: Victoria -->
+                <div class="voice-card" data-voice="Victoria">
+                    <div class="voice-visualizer">
+                        <div class="voice-bars">
+                            <div></div><div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    <h3>Victoria</h3>
+                    <p class="voice-desc">Voix féminine énergique et moderne</p>
+                    <div class="voice-tags">
+                        <span>Féminin</span>
+                        <span>Anglais 🇬🇧</span>
+                        <span>Énergique</span>
+                    </div>
+                    <button class="btn btn-play" onclick="playVoiceSample('Victoria')">
+                        <i data-lucide="play"></i> Écouter
+                    </button>
+                </div>
+
+                <!-- Voice: Adam -->
+                <div class="voice-card" data-voice="Adam">
+                    <div class="voice-visualizer">
+                        <div class="voice-bars">
+                            <div></div><div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    <h3>Adam</h3>
+                    <p class="voice-desc">Voix masculine standard multilingue</p>
+                    <div class="voice-tags">
+                        <span>Masculin</span>
+                        <span>Multilingue 🌍</span>
+                        <span>Standard</span>
+                    </div>
+                    <button class="btn btn-play" onclick="playVoiceSample('Adam')">
+                        <i data-lucide="play"></i> Écouter
+                    </button>
+                </div>
+
+                <!-- Voice: Sarah -->
+                <div class="voice-card" data-voice="Sarah">
+                    <div class="voice-visualizer">
+                        <div class="voice-bars">
+                            <div></div><div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    <h3>Sarah</h3>
+                    <p class="voice-desc">Voix féminine doux et expressif</p>
+                    <div class="voice-tags">
+                        <span>Féminin</span>
+                        <span>Anglais 🇬🇧</span>
+                        <span>Expressif</span>
+                    </div>
+                    <button class="btn btn-play" onclick="playVoiceSample('Sarah')">
+                        <i data-lucide="play"></i> Écouter
+                    </button>
+                </div>
+
+                <!-- Voice: Luna -->
+                <div class="voice-card" data-voice="Luna">
+                    <div class="voice-visualizer">
+                        <div class="voice-bars">
+                            <div></div><div></div><div></div><div></div><div></div>
+                            <div></div><div></div><div></div><div></div><div></div>
+                        </div>
+                    </div>
+                    <h3>Luna</h3>
+                    <p class="voice-desc">Voix féminine douce et créative</p>
+                    <div class="voice-tags">
+                        <span>Féminin</span>
+                        <span>Multilingue 🌍</span>
+                        <span>Créatif</span>
+                    </div>
+                    <button class="btn btn-play" onclick="playVoiceSample('Luna')">
+                        <i data-lucide="play"></i> Écouter
+                    </button>
+                </div>
+            </div>
+
+            <!-- Voice Settings -->
+            <div class="voice-settings-panel">
+                <h3>🎚️ Paramètres de Voix</h3>
+                <div class="setting-row">
+                    <div class="setting-col">
+                        <label>Vitesse</label>
+                        <input type="range" min="0.5" max="2" value="1" step="0.1">
+                        <span>1.0x</span>
+                    </div>
+                    <div class="setting-col">
+                        <label>Ton/Hauteur</label>
+                        <input type="range" min="-20" max="20" value="0">
+                        <span>Normal</span>
+                    </div>
+                    <div class="setting-col">
+                        <label>Volume</label>
+                        <input type="range" min="0" max="100" value="100">
+                        <span>100%</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Info Panel -->
+        <aside class="chat-panel">
+            <div class="panel-header">
+                <h3>ℹ️ À propos</h3>
+            </div>
+            <div class="info-content">
+                <p><strong>Voix ElevenLabs:</strong></p>
+                <p>Technologie IA de pointe pour une synthèse vocale ultra-naturelle.</p>
+                <hr>
+                <p><strong>Voix sélectionnée:</strong></p>
+                <p id="selected-voice">Rachel</p>
+                <button class="btn btn-primary" onclick="setVoice()" style="width: 100%; margin-top: 10px;">
+                    ✓ Confirmer
+                </button>
+            </div>
+        </aside>
+    </main>
+
+    <style>
+        .voice-card {
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid #2a2d3a;
+        }
+
+        .voice-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-4px);
+        }
+
+        .voice-card.active {
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .voice-visualizer {
+            height: 60px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+            margin-bottom: 15px;
+            padding: 20px 0;
+            background: linear-gradient(135deg, #1e1e2e 0%, #2a2d3a 100%);
+            border-radius: 8px;
+        }
+
+        .voice-bars div {
+            width: 6px;
+            background: linear-gradient(180deg, #6366f1 0%, #10b981 100%);
+            border-radius: 3px;
+            height: 20px;
+            animation: bars 0.6s ease-in-out infinite;
+        }
+
+        .voice-bars div:nth-child(1) { animation-delay: 0s; height: 15px; }
+        .voice-bars div:nth-child(2) { animation-delay: 0.1s; height: 25px; }
+        .voice-bars div:nth-child(3) { animation-delay: 0.2s; height: 20px; }
+        .voice-bars div:nth-child(4) { animation-delay: 0.3s; height: 30px; }
+        .voice-bars div:nth-child(5) { animation-delay: 0.4s; height: 22px; }
+        .voice-bars div:nth-child(6) { animation-delay: 0s; height: 18px; }
+        .voice-bars div:nth-child(7) { animation-delay: 0.1s; height: 28px; }
+        .voice-bars div:nth-child(8) { animation-delay: 0.2s; height: 24px; }
+        .voice-bars div:nth-child(9) { animation-delay: 0.3s; height: 20px; }
+        .voice-bars div:nth-child(10) { animation-delay: 0.4s; height: 16px; }
+
+        @keyframes bars {
+            0%, 100% { height: 20px; }
+            50% { height: 8px; }
+        }
+    </style>
+
+    <script>
+        let selectedVoice = 'Rachel';
+
+        document.querySelectorAll('.voice-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.voice-card').forEach(c => c.classList.remove('active'));
+                this.classList.add('active');
+                selectedVoice = this.dataset.voice;
+                document.getElementById('selected-voice').textContent = selectedVoice;
+            });
+        });
+
+        function playVoiceSample(voice) {
+            alert(`🔊 Lecture de l'exemple: ${voice}`);
+        }
+
+        function setVoice() {
+            alert(`✅ Voix ${selectedVoice} définit par défaut!`);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

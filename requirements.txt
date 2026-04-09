@@ -1,0 +1,17 @@
+elevenlabs
+openai-whisper
+transformers
+torch
+huggingface_hub
+accelerate
+librosa
+sounddevice
+pydub
+numpy
+python-dotenv
+pyyaml
+pyaudio
+keyboard
+fastapi
+uvicorn
+python-multipart

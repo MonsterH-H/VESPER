@@ -1,0 +1,21 @@
+# Configuration de l'Assistant Vocal Premium
+
+stt:
+  model: "openai/whisper-small" # whisper-tiny, whisper-small, whisper-medium
+  language: "fr"
+
+llm:
+  model: "microsoft/Phi-3-mini-4k-instruct"
+  max_tokens: 300
+  temperature: 0.7
+
+tts:
+  active: "elevenlabs"
+  elevenlabs:
+    voice_id: "Rachel"
+    model: "eleven_multilingual_v2"
+
+audio:
+  samplerate: 16000
+  channels: 1
+  default_duration: 5

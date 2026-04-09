@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VESPER — Modèles IA</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="mesh-bg">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i data-lucide="zap"></i>
+                VESPER<span>.AI</span>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item">
+                        <a href="/">
+                            <i data-lucide="mic-2"></i>
+                            <span>Interaction</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="/models.html">
+                            <i data-lucide="cpu"></i>
+                            <span>Modèles IA</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/voices.html">
+                            <i data-lucide="volume-2"></i>
+                            <span>Synthèse Vocale</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/settings.html">
+                            <i data-lucide="settings"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Models Section -->
+        <section class="core-stage">
+            <div class="content-header">
+                <h2>🧠 Modèles Intelligents</h2>
+                <p>Architecture IA optimisée pour la performance en temps réel</p>
+            </div>
+
+            <div class="models-grid">
+                <!-- STT Model -->
+                <div class="model-card">
+                    <div class="model-header">
+                        <i data-lucide="ear"></i>
+                        <h3>Reconnaissance Vocale (STT)</h3>
+                    </div>
+                    <div class="model-info">
+                        <p class="model-name" id="stt-model">Chargement...</p>
+                        <p class="model-status">
+                            <span class="status-dot" id="stt-status"></span>
+                            <span id="stt-loaded">En attente</span>
+                        </p>
+                    </div>
+                    <div class="model-desc">
+                        <p>Convertit la parole en texte avec une haute précision. Basé sur OpenAI Whisper.</p>
+                        <small>Latence: ~500ms | Capacité: Multiples langues</small>
+                    </div>
+                </div>
+
+                <!-- LLM Model -->
+                <div class="model-card">
+                    <div class="model-header">
+                        <i data-lucide="brain"></i>
+                        <h3>Intelligence Linguistique (LLM)</h3>
+                    </div>
+                    <div class="model-info">
+                        <p class="model-name" id="llm-model">Chargement...</p>
+                        <p class="model-status">
+                            <span class="status-dot" id="llm-status"></span>
+                            <span id="llm-loaded">En attente</span>
+                        </p>
+                    </div>
+                    <div class="model-desc">
+                        <p>Génère des réponses intelligentes et contextuelles. Modèle optimisé pour la latence.</p>
+                        <small>Paramètres: 3.8B | Générateur: Transformers</small>
+                    </div>
+                </div>
+
+                <!-- TTS Model -->
+                <div class="model-card">
+                    <div class="model-header">
+                        <i data-lucide="volume-2"></i>
+                        <h3>Synthèse Vocale (TTS)</h3>
+                    </div>
+                    <div class="model-info">
+                        <p class="model-name" id="tts-model">ElevenLabs API</p>
+                        <p class="model-status">
+                            <span class="status-dot" id="tts-status"></span>
+                            <span id="tts-loaded">Online</span>
+                        </p>
+                    </div>
+                    <div class="model-desc">
+                        <p>Voix naturelle et expressive. Voix: <strong id="voice-name">Rachel</strong></p>
+                        <small>Qualité: 192kbps | Langage: Français & Anglais</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="metrics-panel">
+                <h3>📊 Performance</h3>
+                <div class="metrics-row">
+                    <div class="metric">
+                        <span class="metric-label">Temps total (cycle)</span>
+                        <span class="metric-value" id="total-time">0ms</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Temps STT</span>
+                        <span class="metric-value" id="stt-time">0ms</span>
+                    </div>
+                    <div class="metric">
+                        <span class="metric-label">Temps LLM</span>
+                        <span class="metric-value" id="llm-time">0ms</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat History Panel -->
+        <aside class="chat-panel">
+            <div class="panel-header">
+                <h3>ℹ️ Informations</h3>
+            </div>
+            <div class="info-content">
+                <p><strong>VESPER v1.0</strong></p>
+                <p>Assistant vocal premium utilisant les dernières technologies en IA.</p>
+                <hr>
+                <p><small>Les modèles sont appelés via l'API cloud à la première requête pour un démarrage rapide.</small></p>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        async function loadModels() {
+            try {
+                const response = await fetch(`${API_URL}/api/models`);
+                const data = await response.json();
+
+                // STT
+                document.getElementById('stt-model').textContent = data.models.stt;
+                document.getElementById('stt-status').className = 'status-dot ' + (data.loaded.stt ? 'loaded' : 'idle');
+                document.getElementById('stt-loaded').textContent = data.loaded.stt ? 'Chargé ✓' : 'Prêt au chargement';
+
+                // LLM
+                document.getElementById('llm-model').textContent = data.models.llm;
+                document.getElementById('llm-status').className = 'status-dot ' + (data.loaded.llm ? 'loaded' : 'idle');
+                document.getElementById('llm-loaded').textContent = data.loaded.llm ? 'Chargé ✓' : 'Prêt au chargement';
+
+                // TTS
+                document.getElementById('tts-model').textContent = data.models.tts;
+                document.getElementById('tts-status').className = 'status-dot loaded';
+                document.getElementById('voice-name').textContent = data.models.voice;
+            } catch (err) {
+                console.error('Erreur:', err);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadModels();
+            setInterval(loadModels, 5000);
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

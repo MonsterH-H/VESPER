@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VESPER — Paramètres</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="mesh-bg">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i data-lucide="zap"></i>
+                VESPER<span>.AI</span>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item">
+                        <a href="/">
+                            <i data-lucide="mic-2"></i>
+                            <span>Interaction</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/models.html">
+                            <i data-lucide="cpu"></i>
+                            <span>Modèles IA</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/voices.html">
+                            <i data-lucide="volume-2"></i>
+                            <span>Synthèse Vocale</span>
+                        </a>
+                    </li>
+                    <li class="nav-item active">
+                        <a href="/settings.html">
+                            <i data-lucide="settings"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Settings Section -->
+        <section class="core-stage">
+            <div class="content-header">
+                <h2>⚙️ Paramètres Système</h2>
+                <p>Configurez les aspects techniques de VESPER</p>
+            </div>
+
+            <div class="settings-grid">
+                <!-- Audio Settings -->
+                <div class="settings-card">
+                    <h3>🎙️ Paramètres Audio</h3>
+                    <div class="setting-item">
+                        <label>Fréquence d'échantillonnage</label>
+                        <select id="samplerate">
+                            <option value="16000">16 kHz (Standard)</option>
+                            <option value="22050">22.05 kHz</option>
+                            <option value="44100">44.1 kHz (Studio)</option>
+                        </select>
+                        <small>Plus élevé = meilleure qualité, plus de latence</small>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Durée d'enregistrement</label>
+                        <div class="slider-container">
+                            <input type="range" id="duration" min="3" max="15" value="5">
+                            <span id="duration-value">5s</span>
+                        </div>
+                        <small>Temps d'enregistrement par interaction</small>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Canaux</label>
+                        <select id="channels">
+                            <option value="1">Mono (Recommandé)</option>
+                            <option value="2">Stéréo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- STT Settings -->
+                <div class="settings-card">
+                    <h3>👂 Reconnaissance Vocale</h3>
+                    <div class="setting-item">
+                        <label>Modèle STT</label>
+                        <select id="stt-model">
+                            <option value="openai/whisper-tiny">Tiny (Rapide)</option>
+                            <option value="openai/whisper-small" selected>Small (Équilibré)</option>
+                            <option value="openai/whisper-base">Base (Qualité)</option>
+                            <option value="openai/whisper-medium">Medium (Haute qualité)</option>
+                        </select>
+                        <small>Modèles plus grands = plus accurate mais plus lent</small>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Langue</label>
+                        <select id="language">
+                            <option value="fr">Français</option>
+                            <option value="en">Anglais</option>
+                            <option value="auto">Détection automatique</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- LLM Settings -->
+                <div class="settings-card">
+                    <h3>🧠 Modèle de Langage</h3>
+                    <div class="setting-item">
+                        <label>Température (Créativité)</label>
+                        <div class="slider-container">
+                            <input type="range" id="temperature" min="0" max="100" value="70">
+                            <span id="temp-value">0.70</span>
+                        </div>
+                        <small>0 = Déterministe, 100 = Créatif</small>
+                    </div>
+
+                    <div class="setting-item">
+                        <label>Longueur max de réponse</label>
+                        <div class="slider-container">
+                            <input type="range" id="max-tokens" min="50" max="500" value="256">
+                            <span id="tokens-value">256</span>
+                        </div>
+                        <small>Nombre maximum de tokens générés</small>
+                    </div>
+                </div>
+
+                <!-- System Info -->
+                <div class="settings-card">
+                    <h3>ℹ️ Informations Système</h3>
+                    <div class="info-row">
+                        <span>Version:</span>
+                        <strong>1.0.0</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>Status Serveur:</span>
+                        <strong id="server-status">Vérification...</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>API Endpoint:</span>
+                        <strong>http://localhost:8000</strong>
+                    </div>
+                    <div class="info-row">
+                        <span>Mode:</span>
+                        <strong>Production</strong>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="saveSettings()">💾 Enregistrer les paramètres</button>
+                <button class="btn btn-secondary" onclick="resetSettings()">🔄 Restaurer les défauts</button>
+            </div>
+        </section>
+
+        <!-- Info Panel -->
+        <aside class="chat-panel">
+            <div class="panel-header">
+                <h3>📖 Aide</h3>
+            </div>
+            <div class="info-content">
+                <p><strong>Conseils:</strong></p>
+                <ul>
+                    <li>Réduire la durée pour plus de réactivité</li>
+                    <li>Augmenter température pour plus de diversité</li>
+                    <li>Modèles plus petits = plus rapides</li>
+                </ul>
+            </div>
+        </aside>
+    </main>
+
+    <script>
+        const API_URL = 'http://localhost:8000';
+
+        // Initialize sliders
+        document.getElementById('duration').addEventListener('input', (e) => {
+            document.getElementById('duration-value').textContent = e.target.value + 's';
+        });
+
+        document.getElementById('temperature').addEventListener('input', (e) => {
+            document.getElementById('temp-value').textContent = (e.target.value / 100).toFixed(2);
+        });
+
+        document.getElementById('max-tokens').addEventListener('input', (e) => {
+            document.getElementById('tokens-value').textContent = e.target.value;
+        });
+
+        function saveSettings() {
+            alert('✅ Paramètres sauvegardés!');
+        }
+
+        function resetSettings() {
+            document.getElementById('duration').value = 5;
+            document.getElementById('samplerate').value = 16000;
+            document.getElementById('temperature').value = 70;
+            alert('🔄 Paramètres restaurés');
+        }
+
+        async function checkServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/health`);
+                if (response.ok) {
+                    document.getElementById('server-status').textContent = '🟢 En ligne';
+                    document.getElementById('server-status').style.color = '#10b981';
+                } else {
+                    throw new Error('Server error');
+                }
+            } catch (err) {
+                document.getElementById('server-status').textContent = '🔴 Hors ligne';
+                document.getElementById('server-status').style.color = '#ef4444';
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            checkServerStatus();
+            setInterval(checkServerStatus, 10000);
+            lucide.createIcons();
+        });
+    </script>
+</body>
+
+</html>

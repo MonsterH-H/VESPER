@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VESPER — Intelligence Vocale Avancée</title>
+    <link rel="icon"
+        href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+    <link rel="stylesheet" href="style.css">
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+    <!-- Animated Background -->
+    <div class="mesh-bg">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+    </div>
+
+    <!-- Main Dashboard -->
+    <main class="dashboard" id="app">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="brand">
+                <i data-lucide="zap"></i>
+                VESPER<span>.AI</span>
+            </div>
+
+            <nav>
+                <ul class="nav-links">
+                    <li class="nav-item" data-route="home">
+                        <a href="/" data-link>
+                            <i data-lucide="mic-2"></i>
+                            <span>Interaction</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-route="models">
+                        <a href="/models" data-link>
+                            <i data-lucide="cpu"></i>
+                            <span>Modèles IA</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-route="voices">
+                        <a href="/voices" data-link>
+                            <i data-lucide="volume-2"></i>
+                            <span>Synthèse Vocale</span>
+                        </a>
+                    </li>
+                    <li class="nav-item" data-route="settings">
+                        <a href="/settings" data-link>
+                            <i data-lucide="settings"></i>
+                            <span>Paramètres</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="settings-teaser">
+                    <p>Volume d'entrée</p>
+                    <div class="volume-bar">
+                        <div class="volume-fill" id="sidebar-volume" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="settings-teaser">
+                    <p>Moteur actif</p>
+                    <div class="active-model">
+                        <span class="dot" id="system-dot"></span>
+                        <span id="active-model-name">Initialisation...</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Dynamic Content Area -->
+        <div id="content-area" class="content-wrapper">
+            <!-- Content will be injected here -->
+            <div class="view-loader">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </main>
+
+    <script src="app.js"></script>
+    <script>
+        lucide.createIcons();
+    </script>
+</body>
+
+</html>
