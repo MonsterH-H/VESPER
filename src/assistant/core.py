@@ -1,6 +1,6 @@
 import os
 import time
-from src.utils.config_loader import load_config
+from src.utils.config_loader import load_config, save_config
 from src.audio.recorder import AudioRecorder
 from src.stt.whisper_manager import STTManager
 from src.nlp.hf_manager import HFLLMManager
@@ -34,6 +34,25 @@ class AssistantCore:
         # Chemins
         self.temp_audio = "data/raw/input.wav"
         os.makedirs("data/raw", exist_ok=True)
+    
+    def update_config(self, new_config):
+        """Met à jour la configuration et la sauvegarde."""
+        self.config.update(new_config)
+        save_config(self.config)
+        
+        # Mise à jour immédiate de certains paramètres non-modulaires
+        if 'audio' in new_config and 'default_duration' in new_config['audio']:
+            self.default_duration = new_config['audio']['default_duration']
+            
+        # Réinitialiser les pointers pour forcer le re-lazy-load avec les nouvelles configs
+        self.reload_models()
+
+    def reload_models(self):
+        """Force le rechargement des modèles au prochain appel."""
+        print("🔄 Rechargement des modèles IA planifié...")
+        self._stt = None
+        self._llm = None
+        self._tts = None
     
     @property
     def stt(self):

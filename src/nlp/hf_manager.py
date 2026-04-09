@@ -14,21 +14,22 @@ class HFLLMManager:
             raise EnvironmentError("HF_TOKEN is required for remote LLM")
 
         self.model_id = model_id
-        self.endpoint = f"https://api-inference.huggingface.co/models/{model_id}"
+        base_url = os.getenv("HF_API_BASE_URL", "https://api-inference.huggingface.co")
+        self.endpoint = f"{base_url}/models/{model_id}"
         self.history = []
         print(f"🧠 Initialisation LLM cloud : {model_id}")
 
     def build_prompt(self, user_input):
-        system_msg = "Tu es un assistant vocal d'élite nommé 'Vesper'. Tes réponses sont courtes, élégantes et percutantes."
-        conversation = [system_msg]
+        system_msg = "Tu es un assistant vocal d'élite nommé 'Vesper'. Tes réponses sont courtes, élégantes et percutantes. Utilise un ton professionnel mais chaleureux."
+        
+        prompt = f"<|system|>\n{system_msg}<|end|>\n"
+        
         for item in self.history[-6:]:
-            if item["role"] == "user":
-                conversation.append(f"Utilisateur: {item['content']}")
-            else:
-                conversation.append(f"Assistant: {item['content']}")
-        conversation.append(f"Utilisateur: {user_input}")
-        conversation.append("Assistant:")
-        return "\n".join(conversation)
+            role = "user" if item["role"] == "user" else "assistant"
+            prompt += f"<|{role}|>\n{item['content']}<|end|>\n"
+            
+        prompt += f"<|user|>\n{user_input}<|end|>\n<|assistant|>\n"
+        return prompt
 
     def generate_response(self, user_input):
         self.history.append({"role": "user", "content": user_input})
@@ -40,7 +41,8 @@ class HFLLMManager:
                 "max_new_tokens": 250,
                 "temperature": 0.7,
                 "top_p": 0.9,
-                "return_full_text": False
+                "return_full_text": False,
+                "stop": ["<|end|>", "<|user|>", "<|system|>"]
             }
         }
 

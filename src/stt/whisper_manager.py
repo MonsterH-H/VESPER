@@ -11,7 +11,8 @@ class STTManager:
         if not self.token:
             raise EnvironmentError("HF_TOKEN is required for remote STT")
         self.model_id = model_id
-        self.endpoint = f"https://api-inference.huggingface.co/models/{model_id}"
+        base_url = os.getenv("HF_API_BASE_URL", "https://api-inference.huggingface.co")
+        self.endpoint = f"{base_url}/models/{model_id}"
         print(f"👂 Initialisation STT cloud : {model_id}")
 
     def transcribe(self, audio_file):
@@ -30,5 +31,13 @@ class STTManager:
             raise RuntimeError(f"STT API error {response.status_code}: {response.text}")
 
         result = response.json()
-        text = result.get("text") or result.get("generated_text") or ""
+        
+        # Gestion des formats de réponse variés
+        if isinstance(result, list) and len(result) > 0:
+            text = result[0].get("text") or result[0].get("generated_text") or ""
+        elif isinstance(result, dict):
+            text = result.get("text") or result.get("generated_text") or ""
+        else:
+            text = ""
+            
         return text.strip()

@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse
 import uvicorn
 import os
 import sys
+import time
 
 # Ajout du chemin src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
@@ -27,9 +28,14 @@ assistant = None
 @app.on_event("startup")
 async def startup_event():
     global assistant
-    print("⚡ Démarrage du serveur API (initialisation des clients cloud)...")
+    print("⚡ Démarrage du serveur API...")
     assistant = AssistantCore()
-    print("✅ Serveur prêt ! (Les appels API aux modèles seront effectués à la première requête)")
+    
+    # Pré-chargement (Warmup) des clients cloud pour éviter la latence au 1er clic
+    print("🔥 Warmup des modèles IA en cours...")
+    _ = assistant.stt
+    _ = assistant.llm
+    print("✅ Serveur prêt et modèles pré-chargés !")
 
 @app.get("/health")
 async def health_check():
@@ -46,11 +52,13 @@ async def get_status():
 @app.post("/interact")
 async def interact():
     try:
+        start_time = time.time()
         print("🎤 Requête d'interaction reçue...")
         
-        # Enregistrement audio
-        assistant.recorder.record_to_file(assistant.temp_audio, duration=assistant.default_duration)
-        print(f"✅ Audio enregistré")
+        # Enregistrement audio intelligent (VAD)
+        # S'arrête dès que l'utilisateur finit de parler (max 8s, silence 1.2s)
+        assistant.recorder.record_to_file(assistant.temp_audio, duration=8, silence_duration=1.2)
+        print(f"✅ Audio enregistré ({time.time()-start_time:.1f}s)")
         
         # Transcription STT
         print("🔄 Transcription en cours...")
@@ -71,7 +79,7 @@ async def interact():
         print("🔊 Synthèse vocale...")
         assistant.tts.speak(assistant_response)
         
-        print("✅ Interaction complète!")
+        print(f"✅ Interaction complète en {time.time()-start_time:.2f}s!")
         return {
             "success": True,
             "user": user_text,
@@ -105,6 +113,22 @@ async def get_models():
             "tts": assistant._tts is not None
         }
     }
+
+@app.get("/api/voices")
+async def get_voices():
+    """Récupère la liste des voix disponibles via ElevenLabs"""
+    if assistant is None:
+        return {"voices": []}
+    return {"voices": assistant.tts.get_voices()}
+
+@app.post("/api/settings")
+async def update_settings(settings: dict):
+    """Met à jour la configuration du serveur"""
+    try:
+        assistant.update_config(settings)
+        return {"success": True, "message": "Configuration mise à jour"}
+    except Exception as e:
+        return {"success": False, "error": str(e)}
 
 @app.get("/api/config")
 async def get_config():

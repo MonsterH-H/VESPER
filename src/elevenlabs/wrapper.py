@@ -11,6 +11,15 @@ class ElevenLabsManager:
         self.client = ElevenLabs(api_key=self.api_key)
         self.voice_id = voice_id
 
+    def get_voices(self):
+        """Récupère la liste des voix disponibles."""
+        try:
+            voices = self.client.voices.get_all()
+            return [{"id": v.voice_id, "name": v.name, "category": v.category} for v in voices.voices]
+        except Exception as e:
+            print(f"❌ Erreur récupération voix : {e}")
+            return [{"id": "Rachel", "name": "Rachel (Défaut)", "category": "premade"}]
+
     def speak(self, text):
         """Génère et joue l'audio directement."""
         print(f"🗣️ Vocalisation : {text[:50]}...")
@@ -18,7 +27,8 @@ class ElevenLabsManager:
             audio = self.client.generate(
                 text=text,
                 voice=self.voice_id,
-                model="eleven_multilingual_v2"
+                model="eleven_multilingual_v2",
+                stream=True
             )
             play(audio)
         except Exception as e:
