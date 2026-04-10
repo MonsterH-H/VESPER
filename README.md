@@ -60,6 +60,7 @@ Le flux de données est le suivant :
 # Installer les dépendances
 pip install -r requirements.txt
 
+<img width="1326" height="592" alt="image" src="https://github.com/user-attachments/assets/024d65ff-6731-40d0-ba73-920afe26c764" />
 
 
 Nous utilisons les modèles les plus performants disponibles sur Hugging Face :

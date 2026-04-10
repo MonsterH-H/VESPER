@@ -14,10 +14,10 @@ class HFLLMManager:
             raise EnvironmentError("HF_TOKEN is required for remote LLM")
 
         self.model_id = model_id
-        base_url = os.getenv("HF_API_BASE_URL", "https://api-inference.huggingface.co")
+        base_url = os.getenv("HF_API_BASE_URL", "https://router.huggingface.co")
         self.endpoint = f"{base_url}/models/{model_id}"
         self.history = []
-        print(f"🧠 Initialisation LLM cloud : {model_id}")
+        print(f"🧠 Initialisation LLM cloud : {model_id} via {base_url}")
 
     def build_prompt(self, user_input):
         system_msg = "Tu es un assistant vocal d'élite nommé 'Vesper'. Tes réponses sont courtes, élégantes et percutantes. Utilise un ton professionnel mais chaleureux."

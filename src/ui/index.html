@@ -41,6 +41,12 @@
                             <span>Modèles IA</span>
                         </a>
                     </li>
+                    <li class="nav-item" data-route="history">
+                        <a href="/history" data-link>
+                            <i data-lucide="message-square"></i>
+                            <span>Historique</span>
+                        </a>
+                    </li>
                     <li class="nav-item" data-route="voices">
                         <a href="/voices" data-link>
                             <i data-lucide="volume-2"></i>
@@ -57,18 +63,17 @@
             </nav>
 
             <div class="sidebar-footer">
-                <div class="settings-teaser">
-                    <p>Volume d'entrée</p>
-                    <div class="volume-bar">
-                        <div class="volume-fill" id="sidebar-volume" style="width: 0%;"></div>
+                <div class="system-monitor" style="padding: 1rem; background: rgba(0,0,0,0.2); border-radius: var(--radius-md);">
+                    <div style="display: flex; justify-content: space-between; font-size: 0.6rem; color: var(--text-tertiary); text-transform: uppercase; margin-bottom: 4px;">
+                        <span>Latence</span>
+                        <span id="latency-val">24ms</span>
                     </div>
-                </div>
-
-                <div class="settings-teaser">
-                    <p>Moteur actif</p>
-                    <div class="active-model">
-                        <span class="dot" id="system-dot"></span>
-                        <span id="active-model-name">Initialisation...</span>
+                    <div class="volume-bar" style="height: 2px;">
+                        <div class="volume-fill" id="sidebar-volume" style="width: 45%;"></div>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; font-size: 0.65rem; margin-top: 8px;">
+                        <span class="dot" style="width: 6px; height: 6px; background: var(--accent-secondary);"></span>
+                        <span style="color: var(--text-secondary);">Vesper 2.5 Core</span>
                     </div>
                 </div>
             </div>

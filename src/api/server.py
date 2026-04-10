@@ -1,16 +1,20 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import uvicorn
 import os
 import sys
+import asyncio
+import base64
+import json
 import time
 
 # Ajout du chemin src
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..")))
 
 from src.assistant.core import AssistantCore
+from src.nlp.live_manager import GeminiLiveManager
 
 app = FastAPI()
 
@@ -50,40 +54,38 @@ async def get_status():
     return {"status": "online", "model": assistant.config.get('llm', {}).get('model')}
 
 @app.post("/interact")
-async def interact():
+async def interact(file: UploadFile = File(None)):
     try:
         start_time = time.time()
         print("🎤 Requête d'interaction reçue...")
         
-        # Enregistrement audio intelligent (VAD)
-        # S'arrête dès que l'utilisateur finit de parler (max 8s, silence 1.2s)
-        assistant.recorder.record_to_file(assistant.temp_audio, duration=8, silence_duration=1.2)
-        print(f"✅ Audio enregistré ({time.time()-start_time:.1f}s)")
+        # Si un fichier est envoyé par le client (Browser), on l'utilise.
+        # Sinon, on enregistre depuis le micro du serveur (Défaut CLI).
+        if file:
+            print(f"📥 Réception audio du client ({file.filename})...")
+            with open(assistant.temp_audio, "wb") as buffer:
+                content = await file.read()
+                buffer.write(content)
+            print(f"✅ Audio client sauvegardé ({len(content)} bytes)")
+        else:
+            print("🎙️ Enregistrement depuis le micro serveur...")
+            assistant.recorder.record_to_file(assistant.temp_audio, duration=8, silence_duration=1.2)
+            print(f"✅ Audio enregistré ({time.time()-start_time:.1f}s)")
         
-        # Transcription STT
-        print("🔄 Transcription en cours...")
-        user_text = assistant.stt.transcribe(assistant.temp_audio)
+        # Traitement intelligent (Gemini Audio Native ou Standard) via AssistantCore
+        user_text, assistant_response = assistant.process_interaction(assistant.temp_audio)
         
-        if not user_text or len(user_text.strip()) < 2:
-            print("⚠️ Aucun son détecté ou trop court")
-            return {"error": "Aucun son détecté. Parlez plus fort.", "user": "", "assistant": ""}
-        
-        print(f"👤 Texte détecté: {user_text}")
-        
-        # Génération LLM
-        print("🧠 Génération de réponse...")
-        assistant_response = assistant.llm.generate_response(user_text)
-        print(f"🤖 Réponse générée: {assistant_response}")
-        
-        # TTS
-        print("🔊 Synthèse vocale...")
-        assistant.tts.speak(assistant_response)
+        # Synthèse vocale pour le client (Base64 pour le Web)
+        print("🔊 Synthèse vocale ElevenLabs...")
+        audio_bytes = assistant.tts.get_audio_bytes(assistant_response)
+        audio_base64 = base64.b64encode(audio_bytes).decode('utf-8') if audio_bytes else None
         
         print(f"✅ Interaction complète en {time.time()-start_time:.2f}s!")
         return {
             "success": True,
             "user": user_text,
             "assistant": assistant_response,
+            "audio": audio_base64,
             "history": assistant.llm.history[-10:] if hasattr(assistant.llm, 'history') else []
         }
     
@@ -104,6 +106,7 @@ async def get_models():
         "models": {
             "stt": assistant.config.get('stt', {}).get('model', 'openai/whisper-small'),
             "llm": assistant.config.get('llm', {}).get('model', 'microsoft/Phi-3-mini-4k-instruct'),
+            "llm_provider": assistant.config.get('llm', {}).get('provider', 'hf'),
             "tts": "ElevenLabs",
             "voice": assistant.config.get('tts', {}).get('elevenlabs', {}).get('voice_id', 'Rachel')
         },
@@ -140,7 +143,61 @@ async def get_config():
         "tts": assistant.config.get('tts', {})
     }
 
-# Servir l'UI - doit être après les routes de l'API pour ne pas les masquer
+@app.websocket("/ws/audio")
+async def websocket_audio(websocket: WebSocket):
+    await websocket.accept()
+    print("🔌 Client connecté en WebSocket temps-réel")
+    
+    live_manager = GeminiLiveManager()
+    input_queue = asyncio.Queue()
+    output_queue = asyncio.Queue()
+
+    # Tâche : Recevoir l'audio du navigateur (Base64) et le mettre en queue
+    async def receive_from_client():
+        try:
+            while True:
+                data = await websocket.receive_text()
+                # Parse JSON if needed or handle raw text
+                msg = json.loads(data)
+                if msg.get("type") == "audio" and msg.get("data"):
+                    # On convertit le base64 en bytes PCM
+                    audio_bytes = base64.b64decode(msg["data"])
+                    await input_queue.put(audio_bytes)
+                elif msg.get("type") == "end":
+                    await input_queue.put(None)
+                    break
+        except WebSocketDisconnect:
+            print("❌ Client déconnecté")
+            await input_queue.put(None)
+
+    # Tâche : Recevoir l'audio de Gemini (PCM brute) et l'envoyer au navigateur
+    async def send_to_client():
+        try:
+            while True:
+                audio_chunk = await output_queue.get()
+                if audio_chunk is None:
+                    break
+                # On envoie l'audio encodé en base64 au navigateur
+                await websocket.send_text(json.dumps({
+                    "type": "audio",
+                    "data": base64.b64encode(audio_chunk).decode('utf-8')
+                }))
+        except Exception as e:
+            print(f"❌ Erreur envoi client : {e}")
+
+    # Lancement du moteur de session
+    try:
+        await asyncio.gather(
+            receive_from_client(),
+            send_to_client(),
+            live_manager.start_session(input_queue, output_queue)
+        )
+    except Exception as e:
+        print(f"❌ Erreur WebSocket Loop : {e}")
+    finally:
+        print("🛑 Session WebSocket terminée.")
+
+# Servir l'UI
 app.mount("/", StaticFiles(directory="src/ui", html=True), name="ui")
 
 if __name__ == "__main__":

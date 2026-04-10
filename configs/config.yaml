@@ -1,18 +1,18 @@
-# Configuration de l'Assistant Vocal Premium
-
+# Configuration Vesper Premium 2026
 stt:
-  model: "openai/whisper-small" # whisper-tiny, whisper-small, whisper-medium
+  model: "openai/whisper-large-v3-turbo"
   language: "fr"
 
 llm:
-  model: "microsoft/Phi-3-mini-4k-instruct"
-  max_tokens: 300
+  provider: "gemini"
+  model: "gemini-2.5-pro" # Modéle STABLE 2026 ultra-puissant
+  max_tokens: 500
   temperature: 0.7
 
 tts:
   active: "elevenlabs"
   elevenlabs:
-    voice_id: "Rachel"
+    voice_id: "CwhRBWXzGAHq8TQ4Fs17" # Roger (Vérifié 2026)
     model: "eleven_multilingual_v2"
 
 audio:

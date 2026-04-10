@@ -11,9 +11,9 @@ class STTManager:
         if not self.token:
             raise EnvironmentError("HF_TOKEN is required for remote STT")
         self.model_id = model_id
-        base_url = os.getenv("HF_API_BASE_URL", "https://api-inference.huggingface.co")
+        base_url = os.getenv("HF_API_BASE_URL", "https://router.huggingface.co")
         self.endpoint = f"{base_url}/models/{model_id}"
-        print(f"👂 Initialisation STT cloud : {model_id}")
+        print(f"👂 Initialisation STT cloud : {model_id} via {base_url}")
 
     def transcribe(self, audio_file):
         print(f"🔍 Transcription de {audio_file} via HuggingFace API...")
@@ -25,10 +25,12 @@ class STTManager:
             "Accept": "application/json"
         }
         with open(audio_file, "rb") as f:
-            response = requests.post(self.endpoint, headers=headers, data=f)
+            response = requests.post(self.endpoint, headers=headers, files={"file": f}, timeout=60)
 
         if response.status_code != 200:
-            raise RuntimeError(f"STT API error {response.status_code}: {response.text}")
+            raise RuntimeError(
+                f"STT API error {response.status_code} for endpoint {self.endpoint}: {response.text}"
+            )
 
         result = response.json()
         

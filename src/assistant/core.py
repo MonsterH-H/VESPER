@@ -4,6 +4,8 @@ from src.utils.config_loader import load_config, save_config
 from src.audio.recorder import AudioRecorder
 from src.stt.whisper_manager import STTManager
 from src.nlp.hf_manager import HFLLMManager
+from src.nlp.gemini_manager import GeminiLLMManager
+from src.nlp.mistral_manager import MistralLLMManager
 from src.elevenlabs.wrapper import ElevenLabsManager
 
 class AssistantCore:
@@ -65,11 +67,21 @@ class AssistantCore:
     
     @property
     def llm(self):
-        """Lazy load LLM (Hugging Face)"""
+        """Lazy load LLM (Hugging Face, Gemini ou Mistral)"""
         if self._llm is None:
-            print("🧠 Initialisation du cerveau IA")
             llm_cfg = self.config.get('llm', {})
-            self._llm = HFLLMManager(model_id=llm_cfg.get('model', 'microsoft/Phi-3-mini-4k-instruct'))
+            provider = llm_cfg.get('provider', 'hf')
+            model_id = llm_cfg.get('model', 'microsoft/Phi-3-mini-4k-instruct')
+            
+            print(f"🧠 Initialisation du cerveau IA (Provider: {provider}, Modèle: {model_id})")
+            
+            if provider == 'gemini':
+                self._llm = GeminiLLMManager(model_id=model_id)
+            elif provider == 'mistral':
+                self._llm = MistralLLMManager(model_id=model_id)
+            else: # hf par défaut
+                self._llm = HFLLMManager(model_id=model_id)
+                
         return self._llm
     
     @property
@@ -81,29 +93,44 @@ class AssistantCore:
             self._tts = ElevenLabsManager(voice_id=tts_cfg.get('voice_id', 'Rachel'))
         return self._tts
 
+    def process_interaction(self, audio_path):
+        """
+        Génère une réponse complète de l'assistant à partir d'un fichier audio.
+        Si Gemini est actif, utilise l'audio directement (Premium Native).
+        Sinon, utilise Whisper -> LLM (Standard).
+        """
+        start_time = time.time()
+        provider = self.config.get('llm', {}).get('provider', 'hf')
+        user_text = ""
+
+        if provider == "gemini":
+            print("🚀 [PREMIUM] Mode Native Audio Gemini activé...")
+            # Gemini peut analyser l'audio directement
+            response = self.llm.generate_response("", audio_path=audio_path)
+            # Puisqu'on n'a pas utilisé STT, on demande à Gemini de résumer ce qu'il a entendu (optionnel)
+            # Mais pour la vitesse on s'en passe
+            user_text = "[Audio Native Gemini]"
+        else:
+            # Mode standard : STT d'abord
+            user_text = self.stt.transcribe(audio_path)
+            if not user_text or len(user_text) < 2:
+                raise ValueError("Aucun son détecté.")
+            print(f"👤 Utilisateur (STT): {user_text}")
+            response = self.llm.generate_response(user_text)
+
+        print(f"🤖 Assistant: {response} (Total: {time.time()-start_time:.1f}s)")
+        return user_text, response
+
     def process_cycle(self):
-        """Exécute une boucle complète d'interaction vocale."""
-        print(f"\n✨ [PRÊT] - Parlez pendant {self.default_duration}s...")
-        
-        # PHASE 1 : Capture
+        """Boucle CLI classique."""
+        print(f"\n✨ [PRÊT] - {self.default_duration}s...")
         self.recorder.record_to_file(self.temp_audio, duration=self.default_duration)
         
-        # PHASE 2 : Transcription (STT)
-        start_time = time.time()
-        text = self.stt.transcribe(self.temp_audio)
-        if not text or len(text) < 2:
-            print("🔇 Silence ou audio non interprété.")
-            return
-        
-        print(f"👤 Utilisateur : {text} (Transcription en {time.time()-start_time:.1f}s)")
-        
-        # PHASE 3 : Intelligence (LLM)
-        start_time = time.time()
-        response = self.llm.generate_response(text)
-        print(f"🤖 Assistant : {response} (Réflexion en {time.time()-start_time:.1f}s)")
-        
-        # PHASE 4 : Vocalisation (TTS)
-        self.tts.speak(response)
+        try:
+            user_text, response = self.process_interaction(self.temp_audio)
+            self.tts.speak(response, play_on_server=True)
+        except Exception as e:
+            print(f"⚠️ {e}")
 
     def start(self):
         print("\n" + "="*40)
