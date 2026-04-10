@@ -10,7 +10,7 @@ class GeminiLLMManager:
     Gestionnaire LLM Google Gemini (via SDK google-genai).
     Prend en charge le texte et l'audio natif.
     """
-    def __init__(self, model_id="gemini-2.5-pro"):
+    def __init__(self, model_id="gemini-2.0-flash-exp"):
         api_key = os.getenv("GEMINI_API_KEY")
         if not api_key:
             raise EnvironmentError("GEMINI_API_KEY is required")

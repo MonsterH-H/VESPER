@@ -13,8 +13,8 @@ const state = {
     availableVoices: [],
     settings: {
         stt: 'openai/whisper-large-v3-turbo',
-        llm: 'gemini-2.0-flash-exp',
-        llm_provider: 'gemini',
+        llm: 'gpt-4o-mini',
+        llm_provider: 'openrouter',
         temperature: 0.7,
         maxTokens: 256,
         duration: 5,
@@ -167,10 +167,21 @@ const Views = {
                 <div class="settings-card" style="background: rgba(255,255,255,0.02); padding: 1.5rem; border-radius: 12px; border: 1px solid var(--glass-border);">
                     <h3 style="font-size: 0.8rem; text-transform: uppercase; color: var(--accent-primary); margin-bottom: 1.5rem;">🧠 Intelligence Core</h3>
                     <div class="setting-item">
+                        <label style="display: block; font-size: 0.7rem; margin-bottom: 8px; color: var(--text-secondary);">Provider</label>
+                        <select id="set-llm-provider" style="width: 100%; background: #000; color: white; border: 1px solid var(--glass-border); padding: 8px; font-size: 0.75rem; border-radius: 4px; margin-bottom: 1rem;">
+                            <option value="openrouter">OpenRouter</option>
+                            <option value="gemini">Gemini</option>
+                            <option value="mistral">Mistral</option>
+                            <option value="hf">Hugging Face</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
                         <label style="display: block; font-size: 0.7rem; margin-bottom: 8px; color: var(--text-secondary);">Large Language Model</label>
                         <select id="set-llm-model" style="width: 100%; background: #000; color: white; border: 1px solid var(--glass-border); padding: 8px; font-size: 0.75rem; border-radius: 4px;">
+                            <option value="gpt-4o-mini">OpenRouter GPT-4o Mini</option>
                             <option value="gemini-2.5-flash">Gemini 2.5 Flash (Production)</option>
                             <option value="mistral-large-latest">Mistral Large (High Accuracy)</option>
+                            <option value="microsoft/Phi-3-mini-4k-instruct">HF Phi-3 Mini Instruct</option>
                         </select>
                     </div>
                 </div>
@@ -294,12 +305,18 @@ async function initModelsView() {
         const llmDesc = document.getElementById('llm-desc-text');
         const llmParams = document.getElementById('llm-params-text');
 
-        if (data.models.llm_provider === 'gemini') {
+        if (data.models.llm_provider === 'openrouter') {
+            llmDesc.textContent = "OpenRouter ultra-flexible pour multi-modèle et latence faible.";
+            llmParams.textContent = "Optimisé pour coût et réactivité";
+        } else if (data.models.llm_provider === 'gemini') {
             llmDesc.textContent = "Analyse multimodale ultra-performante.";
             llmParams.textContent = "Contexte: 1M+ tokens";
         } else if (data.models.llm_provider === 'mistral') {
             llmDesc.textContent = "Souveraineté et efficacité européenne.";
             llmParams.textContent = "Optimisé pour la vitesse";
+        } else {
+            llmDesc.textContent = "Large modèle Hugging Face via router API.";
+            llmParams.textContent = "Flexible et configurable";
         }
 
         updateStatusTab('stt', data.loaded.stt);

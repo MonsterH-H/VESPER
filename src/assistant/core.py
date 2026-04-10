@@ -6,6 +6,7 @@ from src.utils.config_loader import load_config, save_config
 from src.audio.recorder import AudioRecorder
 from src.stt.whisper_manager import STTManager
 from src.nlp.hf_manager import HFLLMManager
+from src.nlp.openrouter_manager import OpenRouterManager
 from src.nlp.gemini_manager import GeminiLLMManager
 from src.nlp.mistral_manager import MistralLLMManager
 from src.elevenlabs.wrapper import ElevenLabsManager
@@ -77,13 +78,15 @@ class AssistantCore:
             
             print(f"🧠 Initialisation du cerveau IA (Provider: {provider}, Modèle: {model_id})")
             
-            if provider == 'gemini':
+            if provider == 'openrouter':
+                self._llm = OpenRouterManager(model_id=model_id)
+            elif provider == 'gemini':
                 self._llm = GeminiLLMManager(model_id=model_id)
             elif provider == 'mistral':
                 self._llm = MistralLLMManager(model_id=model_id)
             else: # hf par défaut
                 self._llm = HFLLMManager(model_id=model_id)
-                
+
         return self._llm
     
     @property
