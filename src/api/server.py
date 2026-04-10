@@ -1,7 +1,9 @@
+from contextlib import asynccontextmanager
+from typing import Any, Dict, Optional, cast
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 import uvicorn
 import os
 import sys
@@ -16,21 +18,10 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".
 from src.assistant.core import AssistantCore
 from src.nlp.live_manager import GeminiLiveManager
 
-app = FastAPI()
+assistant: Optional[AssistantCore] = None
 
-# Autoriser CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-assistant = None
-
-@app.on_event("startup")
-async def startup_event():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     global assistant
     print("⚡ Démarrage du serveur API...")
     assistant = AssistantCore()
@@ -41,20 +32,38 @@ async def startup_event():
     _ = assistant.llm
     print("✅ Serveur prêt et modèles pré-chargés !")
 
+    yield
+
+app = FastAPI(lifespan=lifespan)
+
+# Autoriser CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+assistant: Optional[AssistantCore] = None
+
 @app.get("/health")
 async def health_check():
     """Endpoint de santé rapide - retourne immédiatement"""
     return {"status": "alive"}
 
 @app.get("/status")
-async def get_status():
+async def get_status() -> Dict[str, str]:
     """Endpoint status - vérifie l'état du serveur"""
     if assistant is None:
         return {"status": "initializing", "model": "unknown"}
-    return {"status": "online", "model": assistant.config.get('llm', {}).get('model')}
+    return {"status": "online", "model": assistant.config.get('llm', {}).get('model', 'unknown')}
 
 @app.post("/interact")
-async def interact(file: UploadFile = File(None)):
+async def interact(file: UploadFile = File(None)) -> Dict[str, Any]:
+    if assistant is None:
+        return {"success": False, "error": "Assistant not initialized", "user": "", "assistant": ""}
+
     try:
         start_time = time.time()
         print("🎤 Requête d'interaction reçue...")
@@ -77,7 +86,7 @@ async def interact(file: UploadFile = File(None)):
         
         # Synthèse vocale pour le client (Base64 pour le Web)
         print("🔊 Synthèse vocale ElevenLabs...")
-        audio_bytes = assistant.tts.get_audio_bytes(assistant_response)
+        audio_bytes: Optional[bytes] = assistant.tts.get_audio_bytes(assistant_response)
         audio_base64 = base64.b64encode(audio_bytes).decode('utf-8') if audio_bytes else None
         
         print(f"✅ Interaction complète en {time.time()-start_time:.2f}s!")
@@ -100,8 +109,20 @@ async def interact(file: UploadFile = File(None)):
         }
 
 @app.get("/api/models")
-async def get_models():
+async def get_models() -> Dict[str, Any]:
     """Retourne les informations sur les modèles en usage"""
+    if assistant is None:
+        return {
+            "models": {
+                "stt": "openai/whisper-small",
+                "llm": "microsoft/Phi-3-mini-4k-instruct",
+                "llm_provider": "hf",
+                "tts": "ElevenLabs",
+                "voice": "Rachel"
+            },
+            "loaded": {"stt": False, "llm": False, "tts": False}
+        }
+
     return {
         "models": {
             "stt": assistant.config.get('stt', {}).get('model', 'openai/whisper-small'),
@@ -110,23 +131,22 @@ async def get_models():
             "tts": "ElevenLabs",
             "voice": assistant.config.get('tts', {}).get('elevenlabs', {}).get('voice_id', 'Rachel')
         },
-        "loaded": {
-            "stt": assistant._stt is not None,
-            "llm": assistant._llm is not None,
-            "tts": assistant._tts is not None
-        }
+        "loaded": assistant.loaded
     }
 
 @app.get("/api/voices")
-async def get_voices():
+async def get_voices() -> Dict[str, Any]:
     """Récupère la liste des voix disponibles via ElevenLabs"""
     if assistant is None:
         return {"voices": []}
-    return {"voices": assistant.tts.get_voices()}
+    return {"voices": cast(Any, assistant.tts.get_voices())}
 
 @app.post("/api/settings")
-async def update_settings(settings: dict):
+async def update_settings(settings: Dict[str, Any]) -> Dict[str, Any]:
     """Met à jour la configuration du serveur"""
+    if assistant is None:
+        return {"success": False, "error": "Assistant not initialized"}
+
     try:
         assistant.update_config(settings)
         return {"success": True, "message": "Configuration mise à jour"}
@@ -134,8 +154,11 @@ async def update_settings(settings: dict):
         return {"success": False, "error": str(e)}
 
 @app.get("/api/config")
-async def get_config():
+async def get_config() -> Dict[str, Any]:
     """Retourne la configuration actuelle"""
+    if assistant is None:
+        return {"audio": {}, "stt": {}, "llm": {}, "tts": {}}
+
     return {
         "audio": assistant.config.get('audio', {}),
         "stt": assistant.config.get('stt', {}),
@@ -149,8 +172,8 @@ async def websocket_audio(websocket: WebSocket):
     print("🔌 Client connecté en WebSocket temps-réel")
     
     live_manager = GeminiLiveManager()
-    input_queue = asyncio.Queue()
-    output_queue = asyncio.Queue()
+    input_queue: asyncio.Queue[Optional[bytes]] = asyncio.Queue()
+    output_queue: asyncio.Queue[Optional[bytes]] = asyncio.Queue()
 
     # Tâche : Recevoir l'audio du navigateur (Base64) et le mettre en queue
     async def receive_from_client():

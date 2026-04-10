@@ -1,4 +1,6 @@
 import os
+from typing import Any, Dict, List
+
 import requests
 from dotenv import load_dotenv
 
@@ -6,7 +8,7 @@ load_dotenv()
 
 class STTManager:
     """Service Speech-to-Text utilisant HuggingFace Inference API."""
-    def __init__(self, model_id="openai/whisper-small"):
+    def __init__(self, model_id: str = "openai/whisper-small") -> None:
         self.token = os.getenv("HF_TOKEN")
         if not self.token:
             raise EnvironmentError("HF_TOKEN is required for remote STT")
@@ -15,7 +17,7 @@ class STTManager:
         self.endpoint = f"{base_url}/models/{model_id}"
         print(f"👂 Initialisation STT cloud : {model_id} via {base_url}")
 
-    def transcribe(self, audio_file):
+    def transcribe(self, audio_file: str) -> str:
         print(f"🔍 Transcription de {audio_file} via HuggingFace API...")
         if not os.path.exists(audio_file):
             raise FileNotFoundError(f"Audio file introuvable: {audio_file}")

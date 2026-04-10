@@ -1,6 +1,8 @@
 import asyncio
 import base64
 import os
+from typing import Optional
+
 from google import genai
 from google.genai.types import LiveConnectConfig, Modality
 from dotenv import load_dotenv
@@ -25,7 +27,11 @@ class GeminiLiveManager:
             system_instruction="Tu es 'Vesper', un assistant vocal d'élite. Tu parles directement à l'utilisateur. Tes réponses sont courtes, élégantes et percutantes."
         )
 
-    async def start_session(self, input_audio_queue, output_audio_queue):
+    async def start_session(
+        self,
+        input_audio_queue: asyncio.Queue[Optional[bytes]],
+        output_audio_queue: asyncio.Queue[Optional[bytes]],
+    ) -> None:
         """
         Gère la session bidirectionnelle entre le client et Gemini Live.
         """
