@@ -21,7 +21,7 @@ class AssistantCore:
         # 1. Charger la config
         self.config: Dict[str, Any] = load_config()
         
-        print("🔧 Initialisation rapide du système...")
+        print("Initialisation rapide du systeme...")
         
         # Audio (léger)
         audio_cfg = self.config.get('audio', {})
@@ -54,7 +54,7 @@ class AssistantCore:
 
     def reload_models(self) -> None:
         """Force le rechargement des modèles au prochain appel."""
-        print("🔄 Rechargement des modèles IA planifié...")
+        print("Rechargement des modèles IA planifié...")
         self._stt = None
         self._llm = None
         self._tts = None
@@ -63,7 +63,7 @@ class AssistantCore:
     def stt(self) -> STTManager:
         """Lazy load STT (Whisper)"""
         if self._stt is None:
-            print("👂 Initialisation des oreilles : openai/whisper-small")
+            print("Initialisation des oreilles : openai/whisper-small")
             stt_cfg = self.config.get('stt', {})
             self._stt = STTManager(model_id=stt_cfg.get('model', 'openai/whisper-small'))
         return self._stt
@@ -76,7 +76,7 @@ class AssistantCore:
             provider = llm_cfg.get('provider', 'hf')
             model_id = llm_cfg.get('model', 'microsoft/Phi-3-mini-4k-instruct')
             
-            print(f"🧠 Initialisation du cerveau IA (Provider: {provider}, Modèle: {model_id})")
+            print(f"Initialisation du cerveau IA (Provider: {provider}, Modèle: {model_id})")
             
             if provider == 'openrouter':
                 self._llm = OpenRouterManager(model_id=model_id)
@@ -93,7 +93,7 @@ class AssistantCore:
     def tts(self) -> ElevenLabsManager:
         """Lazy load TTS (ElevenLabs)"""
         if self._tts is None:
-            print("🔊 Initialisation de la voix")
+            print("Initialisation de la voix")
             tts_cfg = self.config.get('tts', {}).get('elevenlabs', {})
             self._tts = ElevenLabsManager(voice_id=tts_cfg.get('voice_id', 'Rachel'))
         return self._tts
@@ -118,7 +118,7 @@ class AssistantCore:
         user_text = ""
 
         if provider == "gemini":
-            print("🚀 [PREMIUM] Mode Native Audio Gemini activé...")
+            print("[PREMIUM] Mode Native Audio Gemini active...")
             # Gemini peut analyser l'audio directement
             response = self.llm.generate_response("", audio_path=audio_path)
             # Puisqu'on n'a pas utilisé STT, on demande à Gemini de résumer ce qu'il a entendu (optionnel)
@@ -129,15 +129,15 @@ class AssistantCore:
             user_text = self.stt.transcribe(audio_path)
             if not user_text or len(user_text) < 2:
                 raise ValueError("Aucun son détecté.")
-            print(f"👤 Utilisateur (STT): {user_text}")
+            print(f"Utilisateur (STT): {user_text}")
             response = self.llm.generate_response(user_text)
 
-        print(f"🤖 Assistant: {response} (Total: {time.time()-start_time:.1f}s)")
+        print(f"Assistant: {response} (Total: {time.time()-start_time:.1f}s)")
         return user_text, response
 
     def process_cycle(self):
         """Boucle CLI classique."""
-        print(f"\n✨ [PRÊT] - {self.default_duration}s...")
+        print(f"\n[PRET] - {self.default_duration}s...")
         self.recorder.record_to_file(self.temp_audio, duration=self.default_duration)
         
         try:
@@ -148,7 +148,7 @@ class AssistantCore:
 
     def start(self):
         print("\n" + "="*40)
-        print("🚀 ASSISTANT VOCAL PREMIUM DÉMARRÉ")
+        print("ASSISTANT VOCAL PREMIUM DEMARRE")
         print("Modèle LLM : " + self.config.get('llm', {}).get('model', 'Default'))
         print("Modèle STT : " + self.config.get('stt', {}).get('model', 'Default'))
         print("="*40)
@@ -157,6 +157,6 @@ class AssistantCore:
             while True:
                 self.process_cycle()
         except KeyboardInterrupt:
-            print("\n👋 Extinction de l'assistant...")
+            print("\nExtinction de l'assistant...")
         except Exception as e:
-            print(f"\n❌ Erreur fatale : {e}")
+            print(f"\nErreur fatale : {e}")

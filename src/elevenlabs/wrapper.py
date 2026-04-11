@@ -13,17 +13,24 @@ class ElevenLabsManager:
         self.voice_id = voice_id
 
     def get_voices(self) -> List[Dict[str, str]]:
-        """Récupère la liste des voix disponibles."""
+        """Recupere la liste des voix disponibles."""
         try:
             voices = self.client.voices.get_all()
-            return [{"id": v.voice_id, "name": v.name, "category": v.category} for v in voices.voices]
+            return [{"id": str(v.voice_id), "name": str(v.name), "category": str(v.category)} for v in voices.voices]
         except Exception as e:
-            print(f"❌ Erreur récupération voix : {e}")
-            return [{"id": "Rachel", "name": "Rachel (Défaut)", "category": "premade"}]
+            print(f"Erreur recuperation voix : {e}")
+            return [{"id": "Rachel", "name": "Rachel (Defaut)", "category": "premade"}]
+
+    def list_voices(self) -> List[Dict[str, str]]:
+        """Liste les voix vers la console et retourne la liste."""
+        voices = self.get_voices()
+        for v in voices:
+            print(f"- {v['name']} ({v['id']}) [{v['category']}]")
+        return voices
 
     def speak(self, text: str, play_on_server: bool = False) -> Any:
-        """Génère et joue l'audio. play_on_server=True pour le mode CLI."""
-        print(f"🗣️ Vocalisation : {text[:50]}...")
+        """Genere et joue l'audio. play_on_server=True pour le mode CLI."""
+        print(f"Vocalisation : {text[:50]}...")
         try:
             audio = self.client.text_to_speech.convert(
                 text=text,
@@ -34,7 +41,7 @@ class ElevenLabsManager:
                 play(audio)
             return audio
         except Exception as e:
-            print(f"❌ Erreur ElevenLabs : {e}")
+            print(f"Erreur ElevenLabs : {e}")
             return None
 
     def get_audio_bytes(self, text: str) -> Optional[bytes]:
@@ -42,7 +49,7 @@ class ElevenLabsManager:
         try:
             return self._generate_with_fallback(text)
         except Exception as e:
-            print(f"❌ Erreur ElevenLabs Bytes : {e}")
+            print(f"Erreur ElevenLabs Bytes : {e}")
             return None
 
     def _generate_with_fallback(self, text: str, voice_id: Optional[str] = None) -> Optional[bytes]:
@@ -58,18 +65,18 @@ class ElevenLabsManager:
         except Exception as e:
             # Si la voix n'est pas trouvée ou interdite (402/404), on cherche une voix de secours
             if "voice_not_found" in str(e) or "payment_required" in str(e):
-                print(f"⚠️ Voix '{target_voice}' indisponible. Recherche d'une voix de secours...")
+                print(f"Voix '{target_voice}' indisponible. Recherche d'une voix de secours...")
                 available_voices = self.get_voices()
                 # On prend la première voix 'premade' disponible
                 fallback = next((v['id'] for v in available_voices if v['category'] == 'premade'), None)
                 if fallback and fallback != target_voice:
-                    print(f"🔄 Repli sur la voix : {fallback}")
+                    print(f"Repli sur la voix : {fallback}")
                     return self._generate_with_fallback(text, voice_id=fallback)
             raise e
 
     def speak_to_file(self, text: str, filename: str) -> str:
-        """Génère et sauvegarde l'audio."""
-        print(f"💾 Sauvegarde vocale : {filename}")
+        """Genere et sauvegarde l'audio."""
+        print(f"Sauvegarde vocale : {filename}")
         audio_gen = self.client.text_to_speech.convert(
             text=text,
             voice_id=self.voice_id,

@@ -1,21 +1,14 @@
-# Configuration Vesper Premium 2026
-stt:
-  model: "openai/whisper-large-v3-turbo"
-  language: "fr"
-
-llm:
-  provider: "openrouter"
-  model: "gpt-4o-mini"
-  max_tokens: 500
-  temperature: 0.7
-
-tts:
-  active: "elevenlabs"
-  elevenlabs:
-    voice_id: "CwhRBWXzGAHq8TQ4Fs17" # Roger (Vérifié 2026)
-    model: "eleven_multilingual_v2"
-
 audio:
-  samplerate: 16000
-  channels: 1
   default_duration: 5
+llm:
+  max_tokens: 500
+  model: gpt-4o-mini
+  provider: openrouter
+  temperature: 0.7
+stt:
+  model: openai/whisper-medium
+tts:
+  active: elevenlabs
+  elevenlabs:
+    model: eleven_multilingual_v2
+    voice_id: CwhRBWXzGAHq8TQ4Fs17

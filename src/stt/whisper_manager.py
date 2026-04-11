@@ -1,47 +1,33 @@
 import os
 from typing import Any, Dict, List
 
-import requests
+from huggingface_hub import InferenceClient
 from dotenv import load_dotenv
 
 load_dotenv()
 
 class STTManager:
-    """Service Speech-to-Text utilisant HuggingFace Inference API."""
+    """Service Speech-to-Text utilisant HuggingFace Inference Client."""
     def __init__(self, model_id: str = "openai/whisper-small") -> None:
         self.token = os.getenv("HF_TOKEN")
         if not self.token:
             raise EnvironmentError("HF_TOKEN is required for remote STT")
         self.model_id = model_id
-        base_url = os.getenv("HF_API_BASE_URL", "https://router.huggingface.co")
-        self.endpoint = f"{base_url}/models/{model_id}"
-        print(f"👂 Initialisation STT cloud : {model_id} via {base_url}")
+        self.client = InferenceClient(model=model_id, token=self.token)
+        print(f"Initialisation STT cloud : {model_id} via InferenceClient")
 
     def transcribe(self, audio_file: str) -> str:
-        print(f"🔍 Transcription de {audio_file} via HuggingFace API...")
+        print(f"Transcription de {audio_file} via InferenceClient...")
         if not os.path.exists(audio_file):
             raise FileNotFoundError(f"Audio file introuvable: {audio_file}")
 
-        headers = {
-            "Authorization": f"Bearer {self.token}",
-            "Accept": "application/json"
-        }
-        with open(audio_file, "rb") as f:
-            response = requests.post(self.endpoint, headers=headers, files={"file": f}, timeout=60)
-
-        if response.status_code != 200:
-            raise RuntimeError(
-                f"STT API error {response.status_code} for endpoint {self.endpoint}: {response.text}"
-            )
-
-        result = response.json()
-        
-        # Gestion des formats de réponse variés
-        if isinstance(result, list) and len(result) > 0:
-            text = result[0].get("text") or result[0].get("generated_text") or ""
-        elif isinstance(result, dict):
-            text = result.get("text") or result.get("generated_text") or ""
-        else:
-            text = ""
+        try:
+            # automatic_speech_recognition est le task specifique pour Whisper
+            result = self.client.automatic_speech_recognition(audio_file)
             
-        return text.strip()
+            if isinstance(result, dict):
+                return (result.get("text") or "").strip()
+            return str(result).strip()
+            
+        except Exception as e:
+            raise RuntimeError(f"STT InferenceClient error: {e}")

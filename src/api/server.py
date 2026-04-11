@@ -23,14 +23,14 @@ assistant: Optional[AssistantCore] = None
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global assistant
-    print("⚡ Démarrage du serveur API...")
+    print("Demarrage du serveur API...")
     assistant = AssistantCore()
     
     # Pré-chargement (Warmup) des clients cloud pour éviter la latence au 1er clic
-    print("🔥 Warmup des modèles IA en cours...")
+    print("Warmup des modèles IA en cours...")
     _ = assistant.stt
     _ = assistant.llm
-    print("✅ Serveur prêt et modèles pré-chargés !")
+    print("Serveur prêt et modèles pré-chargés !")
 
     yield
 
@@ -66,30 +66,30 @@ async def interact(file: UploadFile = File(None)) -> Dict[str, Any]:
 
     try:
         start_time = time.time()
-        print("🎤 Requête d'interaction reçue...")
+        print("Requête d'interaction reçue...")
         
         # Si un fichier est envoyé par le client (Browser), on l'utilise.
         # Sinon, on enregistre depuis le micro du serveur (Défaut CLI).
         if file:
-            print(f"📥 Réception audio du client ({file.filename})...")
+            print(f"Réception audio du client ({file.filename})...")
             with open(assistant.temp_audio, "wb") as buffer:
                 content = await file.read()
                 buffer.write(content)
-            print(f"✅ Audio client sauvegardé ({len(content)} bytes)")
+            print(f"Audio client sauvegardé ({len(content)} bytes)")
         else:
-            print("🎙️ Enregistrement depuis le micro serveur...")
+            print("Enregistrement depuis le micro serveur...")
             assistant.recorder.record_to_file(assistant.temp_audio, duration=8, silence_duration=1.2)
-            print(f"✅ Audio enregistré ({time.time()-start_time:.1f}s)")
+            print(f"Audio enregistré ({time.time()-start_time:.1f}s)")
         
         # Traitement intelligent (Gemini Audio Native ou Standard) via AssistantCore
         user_text, assistant_response = assistant.process_interaction(assistant.temp_audio)
         
         # Synthèse vocale pour le client (Base64 pour le Web)
-        print("🔊 Synthèse vocale ElevenLabs...")
+        print("Synthèse vocale ElevenLabs...")
         audio_bytes: Optional[bytes] = assistant.tts.get_audio_bytes(assistant_response)
         audio_base64 = base64.b64encode(audio_bytes).decode('utf-8') if audio_bytes else None
         
-        print(f"✅ Interaction complète en {time.time()-start_time:.2f}s!")
+        print(f"Interaction complète en {time.time()-start_time:.2f}s!")
         return {
             "success": True,
             "user": user_text,
@@ -100,7 +100,7 @@ async def interact(file: UploadFile = File(None)) -> Dict[str, Any]:
     
     except Exception as e:
         error_msg = str(e)
-        print(f"❌ Erreur: {error_msg}")
+        print(f"Erreur: {error_msg}")
         return {
             "success": False,
             "error": f"Erreur serveur: {error_msg}",

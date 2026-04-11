@@ -16,7 +16,7 @@ class MistralLLMManager:
         self.client = Mistral(api_key=api_key)
         self.model_id = model_id
         self.history = []
-        print(f"🌪️ Initialisation Mistral : {model_id}")
+        print(f"Initialisation Mistral : {model_id}")
 
     def build_messages(self, user_input):
         system_msg = "Tu es un assistant vocal d'élite nommé 'Vesper'. Tes réponses sont courtes, élégantes et percutantes. Utilise un ton professionnel mais chaleureux."
@@ -30,7 +30,7 @@ class MistralLLMManager:
         return messages
 
     def generate_response(self, user_input):
-        print(f"🌪️ Mistral réfléchit ({self.model_id})...")
+        print(f"Mistral reflechit ({self.model_id})...")
         
         messages = self.build_messages(user_input)
         
@@ -47,7 +47,7 @@ class MistralLLMManager:
             self.history.append({"role": "assistant", "content": response_text})
             return response_text
         except Exception as e:
-            print(f"❌ Erreur Mistral : {e}")
+            print(f"Erreur Mistral : {e}")
             raise RuntimeError(f"Mistral API error: {e}")
 
     def clear_memory(self):
