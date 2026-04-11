@@ -45,7 +45,7 @@ class GeminiLiveManager:
                     while True:
                         audio_chunk = await input_audio_queue.get()
                         if audio_chunk is None: break
-                        await session.send(input=audio_chunk, end_of_turn=False)
+                        await session.send(input={'data': audio_chunk, 'mime_type': 'audio/pcm;rate=16000'}, end_of_turn=False)
                 
                 # Co-routine pour recevoir l'audio sortant
                 async def receive_audio():

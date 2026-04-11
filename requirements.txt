@@ -19,5 +19,5 @@ google-generativeai
 mistralai
 google-genai
 websockets
-numpy
-sounddevice
+requests
+aiohttp

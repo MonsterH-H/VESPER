@@ -22,12 +22,21 @@ class STTManager:
             raise FileNotFoundError(f"Audio file introuvable: {audio_file}")
 
         try:
+            with open(audio_file, "rb") as f:
+                audio_data = f.read()
+            
+            if len(audio_data) < 1000:
+                raise ValueError("Audio trop court ou vide.")
+                
             # automatic_speech_recognition est le task specifique pour Whisper
-            result = self.client.automatic_speech_recognition(audio_file)
+            result = self.client.automatic_speech_recognition(audio_data)
             
             if isinstance(result, dict):
                 return (result.get("text") or "").strip()
             return str(result).strip()
             
         except Exception as e:
-            raise RuntimeError(f"STT InferenceClient error: {e}")
+            error_details = getattr(e, 'response', None)
+            if error_details and hasattr(error_details, 'text'):
+                raise RuntimeError(f"STT InferenceClient error ({type(e).__name__}): {error_details.text}")
+            raise RuntimeError(f"STT InferenceClient error ({type(e).__name__}): {str(e)}")

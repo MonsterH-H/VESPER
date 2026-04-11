@@ -1,3 +1,4 @@
+import os
 import subprocess
 import sys
 import time
@@ -8,27 +9,33 @@ def main():
     print("--- Lancement de l'Interface Premium VESPER ---")
     
     # Lancement du serveur uvicorn en arrière-plan
-    print("Démarrage du moteur IA (Backend)...")
-    process = subprocess.Popen([sys.executable, "-m", "uvicorn", "src.api.server:app", "--reload"])
+    # Recherche du python du venv
+    venv_python = os.path.join("venv", "Scripts", "python.exe")
+    python_exe = venv_python if os.path.exists(venv_python) else sys.executable
+    
+    process = subprocess.Popen([python_exe, "-m", "uvicorn", "src.api.server:app", "--reload"])
     
     # Attendre que le serveur démarre et soit prêt
-    url = "http://localhost:8000"
-    print("Attente du démarrage du serveur...")
-    for _ in range(30):  # variable ignorée
+    url = "http://127.0.0.1:8000"
+    print("Attente du démarrage du serveur et chargement des modèles (warmup)...")
+    for i in range(60):  # On attend jusqu'à 60 secondes pour le warmup
         try:
-            response = requests.get(f"{url}/health", timeout=1)
+            # Augmentation du timeout à 5s car le warmup sollicite le CPU
+            response = requests.get(f"{url}/health", timeout=5)
             if response.status_code == 200:
-                print("Serveur prêt !")
+                print("\n✅ Serveur opérationnel et modèles chargés !")
                 break
-        except requests.exceptions.RequestException:
-            pass
+        except (requests.exceptions.RequestException, Exception):
+            # On affiche un indicateur de progression
+            print(".", end="", flush=True)
         time.sleep(1)
     else:
-        print("Le serveur n'a pas démarré dans les délais. Ouvrez manuellement http://localhost:8000")
-        return
+        print("\nLe serveur est trop lent à démarrer. Essayez d'ouvrir manuellement http://localhost:8000")
+        # On ne quitte pas, on laisse l'utilisateur décider
+    
+    print(f"\n🚀 Lancement de l'interface : {url}")
     
     # Ouvrir le navigateur
-    print(f"Ouverture de l'interface à l'adresse : {url}")
     webbrowser.open(url)
     
     try:
